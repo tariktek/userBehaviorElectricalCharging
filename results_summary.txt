@@ -1,0 +1,55 @@
+EV Charging Optimization - Results Summary
+=========================================
+
+Scenario A: Full Grid
+---------------------
+- Model file: scenario_a_full_grid.gms
+- Description: Only grid energy is used. EV charging can be scheduled within the 2.3 kW home charger limit.
+- Model type: LP
+- Status: Optimal
+- Total cost: 165.8408 TL
+
+Scenario B: Hybrid Grid
+-----------------------
+- Model file: scenario_b_hybrid_grid.gms
+- Description: Grid, solar PV, and wind are optimized together. User home/away behavior and solar battery are not included.
+- Model type: LP
+- Status: Optimal
+- Total cost: 52.9746 TL
+
+Scenario C: User-Behavior Adaptive Hybrid
+-----------------------------------------
+- Model file: scenario_c_user_behavior.gms
+- Description: Final model. Grid, solar PV, wind, solar battery, EV battery state, driving consumption, and home/away behavior are optimized together.
+- Model type: MIP
+- Status: Optimal
+- Total cost: 51.1703 TL
+
+Current User Inputs
+-------------------
+- Vehicle: TOGG T10F Long Range
+- Charging station: Ev tipi 220V priz - 2.3 kW
+- Daily distance: 62.0 km
+- Daily EV energy need: 8.8040 kWh
+- Workdays: Pazartesi, Salı, Çarşamba, Perşembe, Cuma
+- Home departure hour: 07:00
+- Home return hour: 18:00
+
+Comparison
+----------
+- Full Grid -> Hybrid Grid saving: 112.8662 TL
+- Hybrid Grid -> User-Behavior Adaptive Hybrid saving: 1.8043 TL
+- Full Grid -> User-Behavior Adaptive Hybrid saving: 114.6705 TL
+
+Notes
+-----
+- Scenario A, B, and C are updated with the same daily EV energy need from the Streamlit interface.
+- Scenario C uses binary variables to prevent simultaneous solar battery charge and discharge.
+- Scenario C additionally uses home/away behavior and EV battery state constraints.
+- Last updated: 19.05.2026 11:32
+
+How to rerun
+------------
+1. gams scenario_a_full_grid.gms
+2. gams scenario_b_hybrid_grid.gms
+3. gams scenario_c_user_behavior.gms
