@@ -12,7 +12,7 @@ PARAMETERS
    load_house(t);
 
 SCALARS
-   daily_ev_need      / 8.8040 /
+   daily_ev_need      / 7.1000 /
    ev_charge_max      / 2.3000 /
    SoE_ini            / 20 /
    SoE_min            / 10 /

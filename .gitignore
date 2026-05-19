@@ -1,0 +1,22 @@
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Streamlit local state
+.streamlit/
+
+# GAMS generated output
+*.log
+*.lst
+*.gdx
+*.g00
+*.lxi
+*.pf
+
+# Local OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

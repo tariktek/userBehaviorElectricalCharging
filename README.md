@@ -68,6 +68,8 @@ Batarya deşarjının doğrudan ayrıca maliyeti yoktur; çünkü bataryadaki en
 | `Ppv(t)` | Solar PV’den doğrudan kullanılan enerji |
 | `Pwind(t)` | Rüzgardan kullanılan enerji |
 | `P_batt_charge(t)` | Solar bataryaya şarj edilen enerji |
+| `P_batt_charge_solar(t)` | Solar üretimden bataryaya aktarılan enerji |
+| `P_batt_charge_wind(t)` | Rüzgar üretiminden bataryaya aktarılan enerji |
 | `P_batt_discharge(t)` | Solar bataryadan çekilen enerji |
 | `P_ev(t)` | EV’ye verilen şarj gücü |
 | `SoE_ev(t)` | EV batarya doluluk durumu |
@@ -89,7 +91,7 @@ Batarya deşarjının doğrudan ayrıca maliyeti yoktur; çünkü bataryadaki en
 | `SoE_min` | 10 kWh | EV minimum batarya seviyesi |
 | `SoE_max` | 88.5 kWh | EV batarya kapasitesi |
 | `CE_EV` | 0.95 | EV şarj verimi |
-| `SoE_batt_ini` | 0 kWh | Solar batarya başlangıç seviyesi |
+| `SoE_batt_ini` | 5 kWh | Solar batarya başlangıç seviyesi |
 | `battery_capacity` | 10 kWh | Solar batarya kapasitesi |
 | `batt_charge_max` | 2.3 kW | Solar batarya şarj limiti |
 | `batt_discharge_max` | 2.3 kW | Solar batarya deşarj limiti |
@@ -116,13 +118,20 @@ Bu denklem ev tüketimini, EV şarjını ve batarya şarjını aynı enerji deng
 Solar üretim ya doğrudan kullanılır ya da bataryaya şarj edilir:
 
 ```text
-Ppv(t) + P_batt_charge(t) <= solar_cap(t)
+Ppv(t) + P_batt_charge_solar(t) <= solar_cap(t)
 ```
 
 ### Rüzgar Kapasitesi
 
 ```text
-Pwind(t) <= wind_cap(t)
+Pwind(t) + P_batt_charge_wind(t) <= wind_cap(t)
+```
+
+Batarya şarjı solar ve rüzgar kaynaklı şarjın toplamıdır:
+
+```text
+P_batt_charge(t) =
+P_batt_charge_solar(t) + P_batt_charge_wind(t)
 ```
 
 ### EV Sadece Evdeyken Şarj Olur
@@ -235,7 +244,7 @@ Nihai çalışmada üç farklı çıktı alınır. Bu üç senaryo aynı 24 saat
 |---|---|---|---|---:|
 | A - Full Şebeke | `scenario_a_full_grid.gms` | LP | Sadece şebeke kullanılır | 157.6198 TL |
 | B - Hibrit Şebeke | `scenario_b_hybrid_grid.gms` | LP | Şebeke + solar + rüzgar kullanılır | 51.3304 TL |
-| C - Kullanıcı Davranışlı Hibrit | `scenario_c_user_behavior.gms` | MIP | Şebeke + solar + rüzgar + solar batarya + EV batarya + evde/dışarıda davranışı | 49.5261 TL |
+| C - Kullanıcı Davranışlı Hibrit | `scenario_c_user_behavior.gms` | MIP | Şebeke + solar + rüzgar + solar/rüzgar şarjlı batarya + EV batarya + evde/dışarıda davranışı | 37.9249 TL |
 
 Bu sonuçlara göre, yalnızca şebeke kullanımına kıyasla hibrit sistem maliyeti ciddi biçimde düşürür. Kullanıcı davranışı ve solar batarya eklendiğinde ek iyileşme sağlanır.
 
@@ -243,8 +252,8 @@ Tasarruf özeti:
 
 ```text
 A -> B: 106.2894 TL
-B -> C:   1.8043 TL
-A -> C: 108.0937 TL
+B -> C:  13.4055 TL
+A -> C: 119.6949 TL
 ```
 
 ---
@@ -324,6 +333,8 @@ GAMS çözüm sonunda şu değerleri raporlar:
 | `Ppv.l` | Saatlik doğrudan solar kullanım |
 | `Pwind.l` | Saatlik rüzgar kullanımı |
 | `P_batt_charge.l` | Solar batarya şarj programı |
+| `P_batt_charge_solar.l` | Solar kaynaklı batarya şarj programı |
+| `P_batt_charge_wind.l` | Rüzgar kaynaklı batarya şarj programı |
 | `P_batt_discharge.l` | Solar batarya deşarj programı |
 | `P_ev.l` | EV şarj programı |
 | `SoE_ev.l` | EV batarya seviyesi |

@@ -14,13 +14,13 @@ PARAMETERS
    load_house(t)   'Saatlik ev içi talep (kW)';
 
 SCALARS
-   daily_ev_need   'Günlük EV şarj ihtiyacı (kWh)' / 8.8040 /
+   daily_ev_need   'Günlük EV şarj ihtiyacı (kWh)' / 7.1000 /
    ev_charge_max   '220V ev şarj aleti limiti (kW)' / 2.3000 /
    SoE_ini         'Başlangıç batarya durumu (kWh)' / 20 /
    SoE_min         'Minimum batarya durumu (kWh)' / 10 /
    SoE_max         'Batarya maksimum kapasitesi (kWh)' / 88.5000 /
    CE_EV           'EV şarj verimi' / 0.95 /
-   SoE_batt_ini    'Solar batarya başlangıç durumu (kWh)' / 0 /
+   SoE_batt_ini    'Solar batarya başlangıç durumu (kWh)' / 5 /
    battery_capacity 'Solar batarya kapasitesi (kWh)' / 10 /
    batt_charge_max 'Solar batarya şarj gücü limiti (kW)' / 2.3 /
    batt_discharge_max 'Solar batarya deşarj gücü limiti (kW)' / 2.3 /
@@ -65,13 +65,15 @@ VARIABLES
    Ppv(t)           'Solar PV doğrudan kullanımı (kW)'
    Pwind(t)         'Rüzgar enerjisi kullanımı (kW)'
    P_batt_charge(t) 'Solar bataryaya şarj gücü (kW)'
+   P_batt_charge_solar(t) 'Solar kaynaklı batarya şarj gücü (kW)'
+   P_batt_charge_wind(t)  'Rüzgar kaynaklı batarya şarj gücü (kW)'
    P_batt_discharge(t) 'Solar bataryadan deşarj gücü (kW)'
    P_ev(t)          'EV şarj gücü (kW)'
    SoE_ev(t)        'EV batarya durumu (kWh)'
    SoE_batt(t)      'Solar batarya doluluk durumu (kWh)'
    total_cost       'Toplam maliyet (TL)';
 
-POSITIVE VARIABLES Pgrid, Ppv, Pwind, P_batt_charge, P_batt_discharge, P_ev, SoE_ev, SoE_batt;
+POSITIVE VARIABLES Pgrid, Ppv, Pwind, P_batt_charge, P_batt_charge_solar, P_batt_charge_wind, P_batt_discharge, P_ev, SoE_ev, SoE_batt;
 BINARY VARIABLES b_batt_ch(t), b_batt_dis(t);
 
 EQUATIONS
@@ -79,6 +81,7 @@ EQUATIONS
    power_balance(t)      'Enerji denge denklemi'
    solar_dispatch(t)     'Solar üretim dağılımı: direkt kullanım + depolama'
    wind_limit(t)         'Rüzgar üretim sınırı'
+   batt_charge_split(t)  'Batarya şarjının solar ve rüzgar kaynaklarına ayrılması'
    ev_home_limit(t)      'EV sadece evdeyken şarj olur'
    ev_charge_need        'Günlük EV şarj ihtiyacı'
    ev_soe_init           'Başlangıç batarya durumu'
@@ -98,14 +101,16 @@ EQUATIONS
    batt_discharge_bigM(t) 'Solar batarya deşarj ikili değişken bağlantısı';
 
 cost_def..       total_cost =E= SUM(t, price_grid(t)*Pgrid(t)
-                                       + price_solar(t)*Ppv(t)
-                                       + price_wind(t)*Pwind(t));
+                                       + price_solar(t)*(Ppv(t) + P_batt_charge_solar(t))
+                                       + price_wind(t)*(Pwind(t) + P_batt_charge_wind(t)));
 
 power_balance(t)..  Pgrid(t) + Ppv(t) + Pwind(t) + P_batt_discharge(t) =E= load_house(t) + P_ev(t) + P_batt_charge(t);
 
-solar_dispatch(t)..  Ppv(t) + P_batt_charge(t) =L= solar_cap(t);
+solar_dispatch(t)..  Ppv(t) + P_batt_charge_solar(t) =L= solar_cap(t);
 
-wind_limit(t)..     Pwind(t) =L= wind_cap(t);
+wind_limit(t)..     Pwind(t) + P_batt_charge_wind(t) =L= wind_cap(t);
+
+batt_charge_split(t).. P_batt_charge(t) =E= P_batt_charge_solar(t) + P_batt_charge_wind(t);
 
 ev_home_limit(t)..  P_ev(t) =L= ev_charge_max * home(t);
 
@@ -137,7 +142,7 @@ batt_discharge_init.. P_batt_discharge('1') =E= 0;
 
 batt_balance(t)$(ord(t) > 1)..  SoE_batt(t) =E= SoE_batt(t-1) + P_batt_charge(t) * CE_batt - P_batt_discharge(t) / CE_batt;
 
-batt_final..        SoE_batt('24') =E= SoE_batt_ini;
+batt_final..        SoE_batt('24') =G= 0;
 
 batt_max(t)..       SoE_batt(t) =L= battery_capacity;
 
@@ -145,7 +150,7 @@ MODEL hybrid_ev /ALL/;
 
 SOLVE hybrid_ev MINIMIZING total_cost USING MIP;
 
-DISPLAY total_cost.l, Pgrid.l, Ppv.l, Pwind.l, P_batt_charge.l, P_batt_discharge.l, P_ev.l, SoE_ev.l, SoE_batt.l, drive_consumption, cheapest_price;
+DISPLAY total_cost.l, Pgrid.l, Ppv.l, Pwind.l, P_batt_charge.l, P_batt_charge_solar.l, P_batt_charge_wind.l, P_batt_discharge.l, P_ev.l, SoE_ev.l, SoE_batt.l, drive_consumption, cheapest_price;
 
 * Notlar:
 * - Batarya modeli SoE_ev(t) ile EV batarya durumu için enerji akışını simüle eder.

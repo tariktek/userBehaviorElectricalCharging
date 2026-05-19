@@ -7,7 +7,7 @@ Scenario A: Full Grid
 - Description: Only grid energy is used. EV charging can be scheduled within the 2.3 kW home charger limit.
 - Model type: LP
 - Status: Optimal
-- Total cost: 165.8408 TL
+- Total cost: 161.3566 TL
 
 Scenario B: Hybrid Grid
 -----------------------
@@ -15,7 +15,7 @@ Scenario B: Hybrid Grid
 - Description: Grid, solar PV, and wind are optimized together. User home/away behavior and solar battery are not included.
 - Model type: LP
 - Status: Optimal
-- Total cost: 52.9746 TL
+- Total cost: 52.0778 TL
 
 Scenario C: User-Behavior Adaptive Hybrid
 -----------------------------------------
@@ -23,30 +23,30 @@ Scenario C: User-Behavior Adaptive Hybrid
 - Description: Final model. Grid, solar PV, wind, solar battery, EV battery state, driving consumption, and home/away behavior are optimized together.
 - Model type: MIP
 - Status: Optimal
-- Total cost: 51.1703 TL
+- Total cost: 37.1775 TL
 
 Current User Inputs
 -------------------
 - Vehicle: TOGG T10F Long Range
 - Charging station: Ev tipi 220V priz - 2.3 kW
-- Daily distance: 62.0 km
-- Daily EV energy need: 8.8040 kWh
+- Daily distance: 50.0 km
+- Daily EV energy need: 7.1000 kWh
 - Workdays: Pazartesi, Salı, Çarşamba, Perşembe, Cuma
 - Home departure hour: 07:00
 - Home return hour: 18:00
 
 Comparison
 ----------
-- Full Grid -> Hybrid Grid saving: 112.8662 TL
-- Hybrid Grid -> User-Behavior Adaptive Hybrid saving: 1.8043 TL
-- Full Grid -> User-Behavior Adaptive Hybrid saving: 114.6705 TL
+- Full Grid -> Hybrid Grid saving: 109.2788 TL
+- Hybrid Grid -> User-Behavior Adaptive Hybrid saving: 14.9003 TL
+- Full Grid -> User-Behavior Adaptive Hybrid saving: 124.1791 TL
 
 Notes
 -----
 - Scenario A, B, and C are updated with the same daily EV energy need from the Streamlit interface.
 - Scenario C uses binary variables to prevent simultaneous solar battery charge and discharge.
 - Scenario C additionally uses home/away behavior and EV battery state constraints.
-- Last updated: 19.05.2026 11:32
+- Last updated: 19.05.2026 12:48
 
 How to rerun
 ------------
